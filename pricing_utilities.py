@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
-from data_utilities import get_clean_data, get_split
 from lightgbm import LGBMRegressor
+
+from data_utilities import get_clean_data, get_split
 
 
 def best_model():
@@ -63,14 +64,14 @@ def optimize_biases_greedy(
             current_sold = (r + b < 0).sum()
             new_sold = (r + b + step < 0).sum()
             sold_deltas.append(new_sold - current_sold)
-            current_misprice = (r[r + b < 0] + b).sum()
-            new_misprice = (r[r + b + step < 0] + b + step).sum()
+            current_misprice = -(r[r + b < 0] + b).sum()
+            new_misprice = -(r[r + b + step < 0] + b + step).sum()
             misprice_deltas.append(new_misprice - current_misprice)
         gradient = np.array(sold_deltas) / misprice_deltas
         if step > 0:
-            best_quantile = gradient.argmax()
-        else:
             best_quantile = gradient.argmin()
+        else:
+            best_quantile = gradient.argmax()
         biases[best_quantile] += step
         return sold_deltas[best_quantile]
 
